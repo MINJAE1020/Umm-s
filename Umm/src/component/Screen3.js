@@ -140,34 +140,6 @@ function Screen3() {
 
     return (
         <div className="screen" style={screen}>
-            <div className="map-container" style={mapContainer}>
-                <div>
-                    <label style={locateContent}>
-                        내위치:{" "}
-                        <div style={locateBar}>
-                            <p>인천광역시 서구 검단동</p>
-                        </div>
-                    </label>
-                </div>
-                <div style={mapContent}>
-                    <label>
-                        배출 요일:<p></p>
-                    </label>
-                    <label>
-                        미수거일:<p></p>
-                    </label>
-                    <label>
-                        배출 장소:<p></p>
-                    </label>
-                    <label>
-                        배출 방법:<p></p>
-                    </label>
-                    <label>
-                        배출 시간:<p></p>
-                    </label>
-                </div>
-            </div>
-
             <div style={alarmContent}>
                 <div style={settingTime}>
                     <input
@@ -224,9 +196,7 @@ function Screen3() {
                                 onClick={() =>
                                     handleRemoveRectangle(rectangle.id)
                                 }
-                            >
-                                -
-                            </button>
+                            ></button>
                         </div>
                     ))}
                 </div>
