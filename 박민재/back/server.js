@@ -5,6 +5,7 @@ const cors = require("cors");
 const app = express();
 app.use(express.json());
 app.use(cors());
+const port = 3001;
 
 const db = mysql.createConnection({
     host: "localhost",
@@ -38,6 +39,6 @@ app.post("/login", (req, res) => {
     });
 });
 
-app.listen(8081, () => {
-    console.log("Server is running on port 8081.");
+app.listen(port, () => {
+    console.log(`서버가 http://localhost:${port} 에서 실행 중입니다.`);
 });
