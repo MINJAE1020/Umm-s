@@ -5,34 +5,10 @@ const screen = {
     justifyContent: "space-between",
 };
 
-const mapContainer = {
-    width: "50%",
-    border: "1px solid black",
+const alarmContent = {
     display: "flex",
     flexDirection: "column",
-};
-
-const locateContent = {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    margin: "2%",
-};
-
-const locateBar = {
-    border: "1px solid black",
-    borderRadius: "5px",
-    width: "80%",
-    boxSizing: "content-box",
-    margin: "2%",
-};
-
-const mapContent = {
-    width: "90%",
-    height: "90%",
-    border: "5px solid rgb(30, 187, 72)",
-    margin: "2%",
-    borderRadius: "5px",
+    width: "50%",
 };
 
 const inputStyle = {
@@ -56,24 +32,15 @@ const addButtonContainer = {
     alignItems: "center",
 };
 
-const rectangleList = {
+const alarmList = {
     display: "flex",
     flexDirection: "column",
 };
 
-const rectangleItem = {
+const alarmItem = {
     display: "flex",
-    // justifyContent: 'center',
     alignItems: "center",
-    marginRight: "10px",
     marginBottom: "10px",
-    border: "1px solid black",
-    marginLeft: "5%",
-    height: "40%",
-};
-
-const rectangle = {
-    marginRight: "10px",
 };
 
 const removeButton = {
@@ -84,27 +51,8 @@ const removeButton = {
     cursor: "pointer",
 };
 
-const alarmContent = {
-    display: "flex",
-    flexDirection: "column",
-    width: "50%",
-};
-
-const pstyle = {
-    fontWeight: "bolder",
-    margin: "25%",
-    marginLeft: "50%",
-    width: "40vh",
-};
-
-const settingTime = {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-};
-
-function Screen3() {
-    const [rectangles, setRectangles] = useState([]);
+const Screen3 = () => {
+    const [alarms, setAlarms] = useState([]);
     const [alarmTime, setAlarmTime] = useState({
         month: "",
         day: "",
@@ -112,25 +60,29 @@ function Screen3() {
         minute: "",
     });
 
-    const handleAddRectangle = () => {
+    const handleAddAlarm = () => {
+        if (alarms.length >= 6) {
+            alert("알람은 최대 6개만 등록 가능.");
+            return;
+        }
+
         const { month, day, hour, minute } = alarmTime;
         if (month !== "" && day !== "" && hour !== "" && minute !== "") {
             const formattedTime = `${month}/${day} ${hour}:${minute}`;
-            setRectangles([
-                ...rectangles,
-                { id: rectangles.length + 1, time: formattedTime },
-            ]);
-            setAlarmTime({ month: "", day: "", hour: "", minute: "" }); // Reset alarmTime after adding to the list
+            const newAlarm = {
+                id: Date.now(), // Using timestamp as ID
+                time: formattedTime,
+            };
+            setAlarms((prevAlarms) => [...prevAlarms, newAlarm]);
+            setAlarmTime({ month: "", day: "", hour: "", minute: "" });
         } else {
-            alert("알람을 설정하기 위해 모든 칸을 입력해주세요.");
+            alert("Please fill in all fields to set the alarm.");
         }
     };
 
-    const handleRemoveRectangle = (id) => {
-        const updatedRectangles = rectangles.filter(
-            (rectangle) => rectangle.id !== id
-        );
-        setRectangles(updatedRectangles);
+    const handleRemoveAlarm = (id) => {
+        const updatedAlarms = alarms.filter((alarm) => alarm.id !== id);
+        setAlarms(updatedAlarms);
     };
 
     const handleInputChange = (e) => {
@@ -141,7 +93,7 @@ function Screen3() {
     return (
         <div className="screen" style={screen}>
             <div style={alarmContent}>
-                <div style={settingTime}>
+                <div>
                     <input
                         style={inputStyle}
                         type="text"
@@ -178,31 +130,29 @@ function Screen3() {
                     />
                 </div>
                 <div style={addButtonContainer}>
-                    <button style={addButton} onClick={handleAddRectangle}>
+                    <button style={addButton} onClick={handleAddAlarm}>
                         +
                     </button>
                     <p>
-                        <strong>알람추가</strong>
+                        <strong>Add Alarm</strong>
                     </p>
                 </div>
-                <div style={rectangleList}>
-                    {rectangles.map((rectangle) => (
-                        <div key={rectangle.id} style={rectangleItem}>
-                            <div style={rectangle}>
-                                <p style={pstyle}>{rectangle.time}</p>
-                            </div>
+                <div style={alarmList}>
+                    {alarms.map((alarm) => (
+                        <div key={alarm.id} style={alarmItem}>
+                            <p>{alarm.time}</p>
                             <button
                                 style={removeButton}
-                                onClick={() =>
-                                    handleRemoveRectangle(rectangle.id)
-                                }
-                            ></button>
+                                onClick={() => handleRemoveAlarm(alarm.id)}
+                            >
+                                Remove
+                            </button>
                         </div>
                     ))}
                 </div>
             </div>
         </div>
     );
-}
+};
 
 export default Screen3;

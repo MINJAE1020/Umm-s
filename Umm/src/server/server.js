@@ -6,7 +6,7 @@ const xlsx = require("xlsx"); //
 const cors = require("cors");
 const cron = require("cron"); // cron 추가
 const app = express();
-const port = 3000;
+const port = 3001;
 require("dotenv").config(); // 환경 변수 로드
 
 app.use(express.json());

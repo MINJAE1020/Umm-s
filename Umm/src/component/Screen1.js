@@ -713,7 +713,7 @@ function Screen1() {
                 dong: selectedNeighborhood,
             });
 
-            const response = await fetch("http://localhost:3000/search", {
+            const response = await fetch("http://localhost:3001/search", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
