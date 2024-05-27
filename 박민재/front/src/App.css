@@ -1,0 +1,207 @@
+.login-display {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.nav {
+    background-color: rgb(30, 187, 72);
+    color: white;
+    text-align: center;
+}
+
+.main-content {
+    display: flex;
+    height: 100%;
+}
+
+.img-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+}
+img {
+    width: 50%;
+}
+
+.login-Content {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ------------------------------ */
+.login-form {
+    margin: 2%;
+    max-width: 100%;
+}
+
+input {
+    font-family: "Roboto", sans-serif;
+    outline: 0;
+    background: #f2f2f2;
+    width: 100%;
+    border: 0;
+    margin: 0 0 15px;
+    padding: 15px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+button {
+    font-family: "Roboto", sans-serif;
+    text-transform: uppercase;
+    outline: 0;
+    background: #4caf50;
+    width: 100%;
+    border: 0;
+    padding: 15px;
+    color: #ffffff;
+    font-size: 14px;
+    -webkit-transition: all 0.3 ease;
+    transition: all 0.3 ease;
+    cursor: pointer;
+}
+button:hover,
+.form button:active,
+.form button:focus {
+    background: #43a047;
+}
+.message {
+    text-align: center;
+    margin: 15px 0 0;
+    color: #b3b3b3;
+    font-size: 12px;
+}
+.message a {
+    color: #4caf50;
+    text-decoration: none;
+}
+
+/* --------------------------- */
+body {
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.login-display {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.createAccount-display {
+    width: 100%;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.nav {
+    background-color: rgb(30, 187, 72);
+    color: white;
+    text-align: center;
+    width: 100%;
+    height: 5rem;
+}
+
+.main-content {
+    display: flex;
+    height: 100%;
+}
+
+.img-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+}
+img {
+    width: 50%;
+}
+
+.login-Content,
+.createAccount-Content {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ------------------------------ */
+
+.login-form,
+.createAccount-form {
+    margin: 2%;
+    max-width: 100%;
+}
+
+input {
+    font-family: "Roboto", sans-serif;
+    outline: 0;
+    background: #f2f2f2;
+    width: 100%;
+    border: 0;
+    margin: 0 0 15px;
+    padding: 15px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+button {
+    font-family: "Roboto", sans-serif;
+    text-transform: uppercase;
+    outline: 0;
+    background: #4caf50;
+    width: 100%;
+    border: 0;
+    padding: 15px;
+    color: #ffffff;
+    font-size: 14px;
+    -webkit-transition: all 0.3 ease;
+    transition: all 0.3 ease;
+    cursor: pointer;
+}
+button:hover,
+.form button:active,
+.form button:focus {
+    background: #43a047;
+}
+.message {
+    text-align: center;
+    margin: 15px 0 0;
+    color: #b3b3b3;
+    font-size: 12px;
+}
+.message a {
+    color: #4caf50;
+    text-decoration: none;
+}
+
+/*------------------*/
+.header {
+    display: flex;
+    position: relative;
+    align-items: center;
+}
+
+.header > .message {
+    display: block;
+    position: absolute;
+    margin: 0 auto;
+    padding: 1rem;
+    left: 5rem;
+    border: #ffffff solid 5px;
+}
+
+.header > .message a {
+    color: #ffffff;
+    font-weight: 700;
+}
