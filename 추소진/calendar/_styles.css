@@ -1,0 +1,145 @@
+.calendar {
+
+
+}
+
+.calendar > .header {
+  size: 100%, 7%;
+  flex: row, space-between, baseline;
+}
+
+.calendar > .header .col.col-first {
+  width: 80%;
+  flex-direction: column;
+  margin-left: 1%;
+}
+
+div.header.row {
+  margin-right: 5px;
+  font-size: 2rem;
+  font-weight: 600;
+  width: 100%;
+  text-align: center;
+}
+
+.col.col-start{
+  margin: 0 auto;
+  text-align: center;
+  align-items: center;
+  width: 100%;
+}
+
+.col.col-start > .text {
+  width: 100%;
+  text-align: left;
+  font-size: 1rem;
+  color: gray;
+}
+
+.col.col-start > .text > .month {
+  color: #4CAF50;
+  font-size: 2rem;
+  margin: 0.5rem;
+}
+
+
+
+.col.col-end{
+  display: inline-block;
+  text-align: right;
+  float: right;
+  margin: 0.5rem;
+  color: #4CAF50;
+}
+
+.col {
+  display: flex;
+  width: 100%;
+}
+
+svg{
+  size: 11%, fit-content;
+  margin-left: 5%;
+  color: transparent(gray, 0.2);
+}
+
+svg:hover{
+  transform: scale(1.15);
+  color:gray;
+}
+
+.days{
+  size: 100%;
+  display: flex;
+  flex-direction: row;
+  font-weight: 600;
+  font-size: 2em;
+  padding: 5px;
+  color: #4CAF50;
+  text-align: center;
+}
+
+.days > .col{
+  size: 12.9%;
+  flex-direction: column;
+  padding-left: 1%;
+  background: transparentize(gray, 0.6);
+  border-radius: 10px;
+}
+
+.body{
+  size:100%;
+  display: inline-block;
+  flex-direction: row;
+}
+
+.body >.row {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+/* .body > .row >.col {
+  size: 13.5%;
+  display: block;
+  flex-direction: row;
+  border: 0.4px solid transparentize(gray, 0.4);
+  border-radius: 3px;
+  font-size: 0.8em;
+} */
+
+.days-row {
+  display: flex;
+  margin: 0 auto;
+  flex-direction: row;
+  width: 100%;
+}
+
+.days-row > .col {
+  margin: 5px;
+}
+
+div.body {
+  margin: 0 auto;
+  position: relative;
+  width: 100%;
+}
+
+div.body > div.row{
+  width: 100%;
+  display: flex;
+  margin: 0 auto;
+  align-items: center;
+  text-align: center;
+}
+
+div.body > .col {
+  width: 100%;
+}
+
+div.body  span {
+  font-size: 2rem;
+  margin: 5px;
+  flex-basis: 50px;
+  flex-grow: 1;
+}
