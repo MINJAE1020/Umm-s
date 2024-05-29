@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const screen = {
     display: "flex",
@@ -59,6 +59,26 @@ const Screen3 = () => {
         hour: "",
         minute: "",
     });
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const currentTime = new Date();
+
+            alarms.forEach((alarm) => {
+                const notificationTime = new Date(alarm.time);
+
+                if (
+                    currentTime.getHours() === notificationTime.getHours() &&
+                    currentTime.getMinutes() === notificationTime.getMinutes()
+                ) {
+                    // Fire notification or trigger desired action here
+                    console.log("Alarm triggered:", alarm.time);
+                }
+            });
+        }, 1000); // Check every second
+
+        return () => clearInterval(interval);
+    }, [alarms]);
 
     const handleAddAlarm = () => {
         if (alarms.length >= 6) {
