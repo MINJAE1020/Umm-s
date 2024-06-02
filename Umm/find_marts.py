@@ -12,8 +12,8 @@ url = 'https://map.kakao.com/'
 
 # Chrome 옵션 설정
 chrome_options = Options()
-chrome_options.binary_location = 'C:/Program Files/Google/Chrome/Application/chrome.exe'  # Chrome 브라우저 설치 경로
-driver = webdriver.Chrome(options=chrome_options, executable_path='E:/대학교/3학년 1학기/창의프로젝트/project/Umm/chromedriver.exe')
+chrome_options.binary_location = '"C:/Program Files/Google/Chrome/Application/chrome.exe"'  # Chrome 브라우저 설치 경로
+driver = webdriver.Chrome(options=chrome_options, executable_path="C:/Users/mjpar/Downloads/chromedriver-win64/chromedriver.exe")
 
 driver.get(url)
 
