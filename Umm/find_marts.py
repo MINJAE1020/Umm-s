@@ -1,25 +1,32 @@
-import json
-import time
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support import expected_conditions as EC
+import time
+import json
+import os
 
-# URL for Kakao Maps
-url = 'https://map.kakao.com/'
+os.makedirs('data', exist_ok=True)
+# 기본 URL 및 Chrome 옵션 설정
+base_url = "https://map.kakao.com/"
+chrome_options = webdriver.ChromeOptions()
+chrome_options.add_argument("lang=ko_KR")
+chrome_options.add_argument('--headless')  # 백그라운드에서 실행
 
-# Chrome 옵션 설정
-chrome_options = Options()
-chrome_options.binary_location = '"C:/Program Files/Google/Chrome/Application/chrome.exe"'  # Chrome 브라우저 설치 경로
-driver = webdriver.Chrome(options=chrome_options, executable_path="C:/Users/mjpar/Downloads/chromedriver-win64/chromedriver.exe")
+# ChromeDriver 경로 설정
+s = Service('E:/대학교/3학년 1학기/창의프로젝트/project/Umm/chromedriver.exe')
 
-driver.get(url)
+# 웹드라이버 초기화
+driver = webdriver.Chrome(service=s, options=chrome_options)
+driver.get(base_url)
+driver.implicitly_wait(5)
 
-key_word = '마트'  # Search term
+# 검색어 설정
+search_query = "마트"
 
-# Function to wait until a CSS element is present
+# css 찾을때 까지 10초대기
 def time_wait(num, code):
     try:
         wait = WebDriverWait(driver, num).until(
@@ -29,92 +36,96 @@ def time_wait(num, code):
         driver.quit()
     return wait
 
-# Function to print mart information
-def mart_list_print():
+# 주차장 정보 출력
+def parking_list_print():
+
     time.sleep(0.2)
-    # Find mart list
-    mart_list = driver.find_elements(By.CSS_SELECTOR, '.placelist > .PlaceItem')
-    
-    for index in range(len(mart_list)):
+
+    # (3) 장소 목록
+    parking_list = driver.find_elements(By.CSS_SELECTOR, '.placelist > .PlaceItem')
+
+    for index in range(len(parking_list)):
         print(index)
 
-        # Find place names
+        # (4) 장소명
         names = driver.find_elements(By.CSS_SELECTOR, '.head_item > .tit_name > .link_name')
-        # Find place types
-        types = driver.find_elements(By.CSS_SELECTOR, '.head_item > .subcategory')
-        # Find addresses
+
+        # (6) 주소
         address_list = driver.find_elements(By.CSS_SELECTOR, '.info_item > .addr')
-        address = address_list[index].find_elements(By.CSS_SELECTOR, 'p')
+        address = address_list.__getitem__(index).find_elements(By.CSS_SELECTOR, 'p')
 
-        mart_name = names[index].text
-        print(mart_name)
+        parking_name = names[index].text
+        print(parking_name)
 
-        mart_type = types[index].text
-        print(mart_type)
-
-        addr1 = address[0].text
+        addr1 = address.__getitem__(0).text
         print(addr1)
 
-        addr2 = address[1].text[5:]
+        addr2 = address.__getitem__(1).text[5:]
         print(addr2)
 
-        # Add data to dictionary
+        # dict에 데이터 집어넣기
         dict_temp = {
-            'name': mart_name,
-            'type': mart_type,
+            'name': parking_name,
             'address1': addr1,
             'address2': addr2
         }
 
-        mart_dict['마트정보'].append(dict_temp)
-        print(f'{mart_name} ...완료')
+        parking_dict['주차장정보'].append(dict_temp)
+        print(f'{parking_name} ...완료')
 
-# Wait for the search bar to be present
+# css를 찾을때 까지 10초 대기
 time_wait(10, 'div.box_searchbar > input.query')
 
-# Find the search bar and enter the keyword
+# (1) 검색창 찾기
 search = driver.find_element(By.CSS_SELECTOR, 'div.box_searchbar > input.query')
-search.send_keys(key_word)
-search.send_keys(Keys.ENTER)
+search.send_keys(search_query)  # 검색어 입력 (마트로 변경)
+search.send_keys(Keys.ENTER)  # 엔터버튼 누르기
 
-time.sleep(1)
+time.sleep(1)  # 대기 시간 추가
 
-# Click the place tab
-place_tab = driver.find_element(By.CSS_SELECTOR, '#info\\.main\\.options > li.option1 > a')
+# (2) 장소 탭 클릭
+place_tab = driver.find_element(By.CSS_SELECTOR, '#info\.main\.options > li.option1 > a')
 place_tab.send_keys(Keys.ENTER)
 
-time.sleep(1)
+time.sleep(1)  # 대기 시간 추가
 
-# Initialize mart dictionary
-mart_dict = {'마트정보': []}
-# Start time for crawling
+# 주차장 리스트
+parking_list = driver.find_elements(By.CSS_SELECTOR, '.placelist > .PlaceItem')
+
+# dictionary 생성
+parking_dict = {'주차장정보': []}
+# 시작시간
 start = time.time()
 print('[크롤링 시작...]')
 
-# Pagination variables
-page = 1
-page2 = 0
+# 페이지 리스트만큼 크롤링하기
+page = 1    # 현재 크롤링하는 페이지가 전체에서 몇번째 페이지인지
+page2 = 0   # 1 ~ 5번째 중 몇번째인지
 error_cnt = 0
 
-while True:
+while 1:
+
+    # 페이지 넘어가며 출력
     try:
         page2 += 1
         print("**", page, "**")
 
-        # Click the page number
+        # (7) 페이지 번호 클릭
         driver.find_element(By.XPATH, f'//*[@id="info.search.page.no{page2}"]').send_keys(Keys.ENTER)
 
-        # Crawl mart list
-        mart_list_print()
+        # 주차장 리스트 크롤링
+        parking_list_print()
 
-        # Check if the next page is available
-        mart_list = driver.find_elements(By.CSS_SELECTOR, '.placelist > .PlaceItem')
-        if len(mart_list) < 15:
+        # 해당 페이지 주차장 리스트
+        parking_list = driver.find_elements(By.CSS_SELECTOR, '.placelist > .PlaceItem')
+        # 한 페이지에 장소 개수가 15개 미만이라면 해당 페이지는 마지막 페이지
+        if len(parking_list) < 15:
             break
+        # 다음 버튼을 누를 수 없다면 마지막 페이지
         if not driver.find_element(By.XPATH, '//*[@id="info.search.page.next"]').is_enabled():
             break
 
-        # If reached the 5th page, click the next button and reset page2
+        # (8) 다섯번째 페이지까지 왔다면 다음 버튼을 누르고 page2 = 0으로 초기화
         if page2 % 5 == 0:
             driver.find_element(By.XPATH, '//*[@id="info.search.page.next"]').send_keys(Keys.ENTER)
             page2 = 0
@@ -130,8 +141,8 @@ while True:
             break
 
 print('[데이터 수집 완료]\n소요 시간 :', time.time() - start)
-driver.quit()  # Close the browser
+driver.quit()  # 작업이 끝나면 창을 닫는다.
 
-# Save data to JSON file
+# json 파일로 저장
 with open('data/mart_data.json', 'w', encoding='utf-8') as f:
-    json.dump(mart_dict, f, indent=4, ensure_ascii=False)
+    json.dump(parking_dict, f, indent=4, ensure_ascii=False)
