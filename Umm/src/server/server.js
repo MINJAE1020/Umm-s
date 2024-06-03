@@ -26,31 +26,6 @@ db.connect((err) => {
         return;
     }
     console.log("Connected to the database.");
-
-    const dropTableQuery = "DROP TABLE IF EXISTS location";
-    db.query(dropTableQuery, (err) => {
-        if (err) {
-            console.error("Error dropping location table:", err);
-        } else {
-            console.log("Location table dropped.");
-
-            const createTableQuery = `
-                CREATE TABLE location (
-                    locationID INT AUTO_INCREMENT PRIMARY KEY,
-                    locationName TEXT,
-                    latitude DECIMAL(10, 7),
-                    longitude DECIMAL(10, 7)
-                )
-            `;
-            db.query(createTableQuery, (err) => {
-                if (err) {
-                    console.error("Error creating location table:", err);
-                } else {
-                    console.log("Location table created.");
-                }
-            });
-        }
-    });
 });
 
 app.post("/login", (req, res) => {
