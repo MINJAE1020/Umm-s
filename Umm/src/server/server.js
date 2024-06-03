@@ -1,13 +1,13 @@
 const express = require("express");
 const mysql = require("mysql2");
-const fs = require("fs"); //
-const path = require("path"); //
-const xlsx = require("xlsx"); //
+const fs = require("fs");
+const path = require("path");
+const xlsx = require("xlsx");
 const cors = require("cors");
-const cron = require("cron"); // cron 추가
+const cron = require("cron");
 const app = express();
 const port = 3001;
-require("dotenv").config(); // 환경 변수 로드
+require("dotenv").config();
 
 app.use(express.json());
 app.use(cors());
@@ -26,6 +26,31 @@ db.connect((err) => {
         return;
     }
     console.log("Connected to the database.");
+
+    const dropTableQuery = "DROP TABLE IF EXISTS location";
+    db.query(dropTableQuery, (err) => {
+        if (err) {
+            console.error("Error dropping location table:", err);
+        } else {
+            console.log("Location table dropped.");
+
+            const createTableQuery = `
+                CREATE TABLE location (
+                    locationID INT AUTO_INCREMENT PRIMARY KEY,
+                    locationName TEXT,
+                    latitude DECIMAL(10, 7),
+                    longitude DECIMAL(10, 7)
+                )
+            `;
+            db.query(createTableQuery, (err) => {
+                if (err) {
+                    console.error("Error creating location table:", err);
+                } else {
+                    console.log("Location table created.");
+                }
+            });
+        }
+    });
 });
 
 app.post("/login", (req, res) => {
@@ -44,22 +69,18 @@ app.post("/login", (req, res) => {
     });
 });
 
-// 파일 경로
 const directoryPath = path.join(__dirname, "data");
 const logFilePath = path.join(__dirname, "processed.log");
 
-// 처리된 파일을 기록하는 로그 파일 초기화
 if (!fs.existsSync(logFilePath)) {
     fs.writeFileSync(logFilePath, "");
 }
 
-// 로그 파일에서 처리된 파일 목록을 읽기
 const processedFiles = fs
     .readFileSync(logFilePath, "utf8")
     .split("\n")
     .filter(Boolean);
 
-// 엑셀 파일을 읽어서 데이터베이스에 저장하는 함수
 function processDataOnce() {
     console.log("Starting processDataOnce...");
     fs.readdir(directoryPath, (err, files) => {
@@ -79,7 +100,6 @@ function processDataOnce() {
                 const worksheet = workbook.Sheets[sheetName];
                 const data = xlsx.utils.sheet_to_json(worksheet);
 
-                // 데이터베이스에 저장할 형식으로 데이터 가공
                 const extractedData = data.map((row) => [
                     row["시도명"],
                     row["시군구명"],
@@ -93,7 +113,6 @@ function processDataOnce() {
                     row["관리부서전화번호"],
                 ]);
 
-                // 데이터베이스에 데이터 삽입
                 const query =
                     "INSERT INTO howtodispose (region, district, dong, disposalDay, nonCollectionDay, disposalLocation, disposalMethod, disposalTime, departmentName, departmentPhone) VALUES ?";
                 db.query(query, [extractedData], (err) => {
@@ -117,14 +136,57 @@ function processDataOnce() {
     });
 }
 
-// 크론 작업 설정: 매일 자정에 processDataOnce 함수 실행
-const job = new cron.CronJob("0 0 * * *", processDataOnce); // 매일 자정에 실행
+function processMartsData() {
+    console.log("Starting processMartsData...");
+    const martsFilePath = path.join(directoryPath, "marts_data.xlsx");
+    if (fs.existsSync(martsFilePath)) {
+        const workbook = xlsx.readFile(martsFilePath);
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const data = xlsx.utils.sheet_to_json(worksheet);
+
+        // Filter out rows with null or undefined locationName, latitude, or longitude
+        const extractedData = data
+            .map((row) => [
+                row["locationName"],
+                row["latitude"],
+                row["longitude"],
+            ])
+            .filter((row) => row[0] && row[1] && row[2]);
+
+        console.log("Filtered Data:", extractedData);
+
+        if (extractedData.length > 0) {
+            const query =
+                "INSERT INTO location (locationName, latitude, longitude) VALUES ?";
+            db.query(query, [extractedData], (err) => {
+                if (err) {
+                    console.error(
+                        "Error inserting marts data into database:",
+                        err
+                    );
+                } else {
+                    console.log("Marts data inserted into database");
+                }
+            });
+        } else {
+            console.log("No valid data to insert.");
+        }
+    } else {
+        console.log("marts_data.xlsx file does not exist.");
+    }
+}
+
+const job = new cron.CronJob("0 0 * * *", () => {
+    processDataOnce();
+    processMartsData();
+});
+
 job.start();
 
-// 서버 시작 시 데이터 처리 함수 실행
 processDataOnce();
+processMartsData();
 
-// 클라이언트로부터 위치 정보를 받아와 해당 정보를 데이터베이스에서 조회하여 반환
 app.post("/search", (req, res) => {
     console.log("Received request:", req.body);
     const { region, district, dong } = req.body;
@@ -135,10 +197,8 @@ app.post("/search", (req, res) => {
             res.status(500).send("Server Error");
         } else {
             if (results.length === 0) {
-                // 데이터가 없을 때 404 에러를 반환
                 res.status(404).json({ error: "Data not found" });
             } else {
-                // 데이터를 JSON 형식으로 클라이언트에게 반환
                 const {
                     disposalDay,
                     nonCollectionDay,
