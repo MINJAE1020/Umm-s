@@ -111,56 +111,13 @@ function processDataOnce() {
     });
 }
 
-function processMartsData() {
-    console.log("Starting processMartsData...");
-    const martsFilePath = path.join(directoryPath, "marts_data.xlsx");
-    if (fs.existsSync(martsFilePath)) {
-        const workbook = xlsx.readFile(martsFilePath);
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const data = xlsx.utils.sheet_to_json(worksheet);
-
-        // Filter out rows with null or undefined locationName, latitude, or longitude
-        const extractedData = data
-            .map((row) => [
-                row["locationName"],
-                row["latitude"],
-                row["longitude"],
-            ])
-            .filter((row) => row[0] && row[1] && row[2]);
-
-        console.log("Filtered Data:", extractedData);
-
-        if (extractedData.length > 0) {
-            const query =
-                "INSERT INTO location (locationName, latitude, longitude) VALUES ?";
-            db.query(query, [extractedData], (err) => {
-                if (err) {
-                    console.error(
-                        "Error inserting marts data into database:",
-                        err
-                    );
-                } else {
-                    console.log("Marts data inserted into database");
-                }
-            });
-        } else {
-            console.log("No valid data to insert.");
-        }
-    } else {
-        console.log("marts_data.xlsx file does not exist.");
-    }
-}
-
 const job = new cron.CronJob("0 0 * * *", () => {
     processDataOnce();
-    processMartsData();
 });
 
 job.start();
 
 processDataOnce();
-processMartsData();
 
 app.post("/search", (req, res) => {
     console.log("Received request:", req.body);
