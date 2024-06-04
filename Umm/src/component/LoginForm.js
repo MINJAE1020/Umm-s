@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import imgUrl from "../img/character1.png";
 
 const LoginForm = () => {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+    const [email, setEmail] = useState("");
+    const [PW, setPW] = useState("");
     const [message, setMessage] = useState("");
     const navigate = useNavigate();
 
@@ -14,8 +14,8 @@ const LoginForm = () => {
 
         try {
             const response = await axios.post("http://localhost:3001/login", {
-                username,
-                password,
+                email,
+                PW,
             });
             console.log(response.data);
             if (response.data.message === "로그인 성공") {
@@ -46,14 +46,14 @@ const LoginForm = () => {
                         <input
                             type="text"
                             placeholder="ID"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
                         <input
                             type="password"
                             placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            value={PW}
+                            onChange={(e) => setPW(e.target.value)}
                         />
                         <button type="submit">Login</button>
                     </form>

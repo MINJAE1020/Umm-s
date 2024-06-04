@@ -29,10 +29,10 @@ db.connect((err) => {
 });
 
 app.post("/login", (req, res) => {
-    const sql = "SELECT * FROM login WHERE username = ? AND password = ?";
-    const { username, password } = req.body;
+    const sql = "SELECT * FROM user WHERE email = ? AND PW = ?";
+    const { email, PW } = req.body;
 
-    db.query(sql, [username, password], (err, data) => {
+    db.query(sql, [email, PW], (err, data) => {
         if (err) {
             return res.status(500).json({ message: "Error" });
         }
