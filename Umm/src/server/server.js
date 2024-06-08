@@ -28,6 +28,42 @@ db.connect((err) => {
     console.log("Connected to the database.");
 });
 
+app.post("/signup", (req, res) => {
+    const { email, PW, userLocation, myTool } = req.body;
+
+    // 이메일 중복 확인
+    const checkDuplicateEmail = "SELECT * FROM user WHERE email = ?";
+    db.query(checkDuplicateEmail, [email], (err, results) => {
+        if (err) {
+            console.error("Error checking duplicate email:", err);
+            return res
+                .status(500)
+                .json({ message: "Error checking duplicate email" });
+        }
+        if (results.length > 0) {
+            // 중복된 이메일이 이미 존재할 경우
+            return res.status(409).json({ message: "중복된 이메일입니다." });
+        } else {
+            // 중복된 이메일이 없을 경우 새로운 회원 등록
+            const insertUserQuery =
+                "INSERT INTO user (email, PW, userLocation, myTool) VALUES (?, ?, ?, ?)";
+            db.query(
+                insertUserQuery,
+                [email, PW, userLocation, myTool],
+                (err) => {
+                    if (err) {
+                        console.error("Error signing up:", err);
+                        return res
+                            .status(500)
+                            .json({ message: "Error signing up" });
+                    }
+                    return res.status(201).json({ message: "회원가입 성공" });
+                }
+            );
+        }
+    });
+});
+
 app.post("/login", (req, res) => {
     const sql = "SELECT * FROM user WHERE email = ? AND PW = ?";
     const { email, PW } = req.body;

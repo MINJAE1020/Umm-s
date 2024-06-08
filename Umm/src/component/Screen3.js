@@ -99,28 +99,6 @@ const Screen3 = () => {
     const dateTimeWithDayOfWeek = `${currentDateTime}, ${currentDayOfWeek}`; // 시간과 요일을 결합
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            const currentTime = new Date();
-
-            alarms.forEach((alarm) => {
-                const [day, time] = alarm.time.split(" ");
-                const [hour, minute] = time.split(":");
-
-                if (
-                    currentTime.getDay().toString() === day &&
-                    currentTime.getHours().toString() === hour &&
-                    currentTime.getMinutes().toString() === minute
-                ) {
-                    alert("배출 시간이 되었습니다!");
-                    clearInterval(interval); // 한 번 알림을 띄우면 interval 정지
-                }
-            });
-        }, 60000);
-
-        return () => clearInterval(interval);
-    }, [alarms]);
-
-    useEffect(() => {
         const fetchAlarms = async () => {
             const userEmail = localStorage.getItem("userEmail");
             if (!userEmail) {
@@ -149,19 +127,47 @@ const Screen3 = () => {
 
         return () => clearInterval(interval);
     }, []);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const currentTime = moment().tz("Asia/Seoul"); // 현재 시간을 서버 시간대로 설정
+
+            alarms.forEach((alarm) => {
+                const { day, hour, minute } = alarm;
+                const alarmTime = moment()
+                    .day(parseInt(day, 10)) // 알람의 요일 설정
+                    .hour(parseInt(hour, 10)) // 알람의 시간 설정
+                    .minute(parseInt(minute, 10)) // 알람의 분 설정
+                    .tz("Asia/Seoul"); // 알람의 시간대 설정
+
+                if (currentTime.isSame(alarmTime, "minute")) {
+                    // 현재 시간과 알람 시간이 분 단위로 일치하는지 확인
+                    alert("배출 시간이 되었습니다!");
+                    clearInterval(interval); // 한 번 알림을 띄우면 interval 정지
+                }
+            });
+        }, 1000); // 1분마다 확인
+
+        return () => clearInterval(interval);
+    }, [alarms]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setAlarmTime((prevState) => ({
             ...prevState,
-            [name]: value,
+            [name]: value.toString(), // 숫자를 문자열로 변환
         }));
     };
 
     const handleAddAlarm = async () => {
-        const userEmail = localStorage.getItem("userEmail"); // 저장된 이메일 가져오기
+        const userEmail = localStorage.getItem("userEmail");
         if (!userEmail) {
             alert("로그인이 필요합니다.");
+            return;
+        }
+
+        // 현재 알람 개수가 4개를 초과하는지 확인
+        if (alarms.length >= 4) {
+            alert("알람은 최대 4개까지만 등록할 수 있습니다.");
             return;
         }
 
@@ -171,18 +177,19 @@ const Screen3 = () => {
                 {
                     userEmail,
                     day: alarmTime.day,
-                    hour: alarmTime.hour,
-                    minute: alarmTime.minute,
+                    hour: alarmTime.hour.padStart(2, "0"),
+                    minute: alarmTime.minute.padStart(2, "0"),
                 }
             );
 
             if (response.status === 200) {
-                setAlarms([
-                    ...alarms,
-                    {
-                        time: `${alarmTime.day} ${alarmTime.hour}:${alarmTime.minute}`,
-                    },
-                ]);
+                const newAlarm = {
+                    day: alarmTime.day,
+                    hour: alarmTime.hour.padStart(2, "0"),
+                    minute: alarmTime.minute.padStart(2, "0"),
+                };
+                setAlarms([...alarms, newAlarm]);
+                setAlarmTime({ day: "", hour: "", minute: "" }); // 알람 추가 후 입력 폼 초기화
             }
         } catch (error) {
             console.error("Error adding alarm:", error);
@@ -193,17 +200,15 @@ const Screen3 = () => {
     const handleRemoveAlarm = async (index) => {
         const userEmail = localStorage.getItem("userEmail");
         const alarm = alarms[index];
-        const [day, time] = alarm.time.split(" ");
-        const [hour, minute] = time.split(":");
 
         try {
             const response = await axios.post(
                 "http://localhost:3001/remove-alarm",
                 {
                     userEmail,
-                    day,
-                    hour,
-                    minute,
+                    day: alarm.day,
+                    hour: alarm.hour,
+                    minute: alarm.minute,
                 }
             );
 
@@ -267,10 +272,11 @@ const Screen3 = () => {
                         알람 추가
                     </button>
                 </div>
-                {alarms.map((alarm, index) => (
+                {alarms.slice(0, 4).map((alarm, index) => (
                     <div key={index} style={alarmItem}>
-                        {daysOfWeek[parseInt(alarm.time?.split(" ")[0], 10)]}{" "}
-                        {alarm.time?.split(" ")[1]}
+                        {daysOfWeek[parseInt(alarm.day, 10)]}{" "}
+                        {alarm.hour ? alarm.hour.padStart(2, "0") : ""}:
+                        {alarm.minute ? alarm.minute.padStart(2, "0") : ""}
                         <button
                             onClick={() => handleRemoveAlarm(index)}
                             style={removeButton}

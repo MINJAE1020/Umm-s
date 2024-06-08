@@ -31,6 +31,11 @@ const LoginForm = () => {
         }
     };
 
+    const handleRegister = () => {
+        // 회원가입 페이지로 이동하는 코드 작성
+        navigate("/signup");
+    };
+
     return (
         <div className="login-display">
             <div className="nav">
@@ -55,9 +60,11 @@ const LoginForm = () => {
                             value={PW}
                             onChange={(e) => setPW(e.target.value)}
                         />
-                        <button type="submit">Login</button>
+                        <button type="submit">sign_in</button>
                     </form>
-                    <p className="message">Not registered? </p>
+                    <p className="message">
+                        <button onClick={handleRegister}>sign_up</button>
+                    </p>
                 </div>
             </div>
             {message && <p>{message}</p>}
