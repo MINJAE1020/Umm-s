@@ -13,14 +13,6 @@ require("dotenv").config();
 app.use(express.json());
 app.use(cors());
 
-// const db = mysql.createConnection({
-//     host: "localhost",
-//     user: "root",
-//     password: "1234",
-//     database: "grabage",
-//     port: 3306,
-// });
-
 const db = mysql.createPool({
     host: "localhost",
     user: "root",
@@ -29,69 +21,6 @@ const db = mysql.createPool({
     port: 3306,
 });
 
-// db.connect((err) => {
-//     if (err) {
-//         console.error("Error connecting to the database:", err);
-//         return;
-//     }
-//     console.log("Connected to the database.");
-// });
-
-// app.post("/signup", (req, res) => {
-//     const { email, PW, userLocation, myTool } = req.body;
-
-//     // 이메일 중복 확인
-//     const checkDuplicateEmail = "SELECT * FROM user WHERE email = ?";
-//     db.query(checkDuplicateEmail, [email], (err, results) => {
-//         if (err) {
-//             console.error("Error checking duplicate email:", err);
-//             return res
-//                 .status(500)
-//                 .json({ message: "Error checking duplicate email" });
-//         }
-//         if (results.length > 0) {
-//             // 중복된 이메일이 이미 존재할 경우
-//             return res.status(409).json({ message: "중복된 이메일입니다." });
-//         } else {
-//             // 중복된 이메일이 없을 경우 새로운 회원 등록
-//             const insertUserQuery =
-//                 "INSERT INTO user (email, PW, userLocation, myTool) VALUES (?, ?, ?, ?)";
-//             db.query(
-//                 insertUserQuery,
-//                 [email, PW, userLocation, myTool],
-//                 (err) => {
-//                     if (err) {
-//                         console.error("Error signing up:", err);
-//                         return res
-//                             .status(500)
-//                             .json({ message: "Error signing up" });
-//                     }
-//                     return res.status(201).json({ message: "회원가입 성공" });
-//                 }
-//             );
-//         }
-//     });
-// });
-
-// app.post("/login", (req, res) => {
-//     const sql = "SELECT * FROM user WHERE email = ? AND PW = ?";
-//     const { email, PW } = req.body;
-
-//     db.query(sql, [email, PW], (err, data) => {
-//         if (err) {
-//             return res.status(500).json({ message: "Error" });
-//         }
-//         if (data.length > 0) {
-//             return res
-//                 .status(200)
-//                 .json({ message: "로그인 성공", email: email });
-//         } else {
-//             return res.status(401).json({ message: "로그인 실패" });
-//         }
-//     });
-// });
-
-// 회원가입
 app.post("/signup", async (req, res) => {
     const { email, PW, userLocation, myTool } = req.body;
 
@@ -114,7 +43,6 @@ app.post("/signup", async (req, res) => {
     }
 });
 
-// 로그인
 app.post("/login", async (req, res) => {
     const { email, PW } = req.body;
 
@@ -246,21 +174,6 @@ app.post("/search", async (req, res) => {
     });
 });
 
-// app.post("/add-alarm", async (req, res) => {
-//     const { userEmail, day, hour, minute } = req.body;
-
-//     const sql =
-//         "INSERT INTO alarm (userEmail, day, hour, minute) VALUES (?, ?, ?, ?)";
-//     await db.query(sql, [userEmail, day, hour, minute], (err) => {
-//         if (err) {
-//             console.error("Error adding alarm to database:", err);
-//             return res
-//                 .status(500)
-//                 .json({ message: "Error adding alarm to database" });
-//         }
-//         return res.status(200).json({ message: "알람이 추가되었습니다." });
-//     });
-// });
 app.post("/add-alarm", async (req, res) => {
     const { userEmail, day, hour, minute } = req.body;
 
@@ -277,24 +190,6 @@ app.post("/add-alarm", async (req, res) => {
     }
 });
 
-// 새로운 엔드포인트 추가: 특정 사용자의 알람을 가져옴
-// app.get("/alarms", async (req, res) => {
-//     const { userEmail } = req.query;
-
-//     const sql = "SELECT day, hour, minute FROM alarm WHERE userEmail = ?";
-//     await db.query(sql, [userEmail], (err, results) => {
-//         if (err) {
-//             console.error("Error fetching alarms from database:", err);
-//             return res
-//                 .status(500)
-//                 .json({ message: "Error fetching alarms from database" });
-//         }
-//         console.log(results);
-
-//         // 데이터베이스에서 가져온 결과를 그대로 클라이언트에 반환
-//         return res.status(200).json(results);
-//     });
-// });
 app.get("/alarms", async (req, res) => {
     const { userEmail } = req.query;
 
@@ -310,21 +205,6 @@ app.get("/alarms", async (req, res) => {
     }
 });
 
-// app.post("/remove-alarm", async (req, res) => {
-//     const { userEmail, day, hour, minute } = req.body;
-
-//     const sql =
-//         "DELETE FROM alarm WHERE userEmail = ? AND day = ? AND hour = ? AND minute = ?";
-//     await db.query(sql, [userEmail, day, hour, minute], (err) => {
-//         if (err) {
-//             console.error("Error removing alarm from database:", err);
-//             return res
-//                 .status(500)
-//                 .json({ message: "Error removing alarm from database" });
-//         }
-//         return res.status(200).json({ message: "알람이 삭제되었습니다." });
-//     });
-// });
 app.post("/remove-alarm", async (req, res) => {
     const { userEmail, day, hour, minute } = req.body;
 
@@ -341,7 +221,6 @@ app.post("/remove-alarm", async (req, res) => {
     }
 });
 
-// ----------------------------------------------------------------------------------요기부터 배출도구
 const toolfilePath = path.join(
     __dirname,
     "tooldata/음식물류 폐기물 종량제 물품 판매현황(종합).xlsx"
@@ -351,7 +230,6 @@ const sheet_name_list = workbook.SheetNames;
 const sheet = workbook.Sheets[sheet_name_list[0]];
 let jsonData = xlsx.utils.sheet_to_json(sheet);
 
-// 필요한 열만 선택
 const columns = [
     "시·도별",
     "구분",
@@ -385,13 +263,10 @@ app.get("/data", (req, res) => {
     );
     res.json(filteredData);
 });
-// -----------------------------------------------------------------------------------------------------여기까지가 배출도구
 
-// ------------------------------------------------------------------------------------------------------- 여기부터 가계부
 const apiKey =
     "T+RNMX1UL/650HYznYbTkx5bYAvuEtsGmWjHi46McZOR3fmjqMtnnDhR4fclFbcWHAsut2IeXs3km36gkBjRIQ==";
 
-// 외부 API 호출 및 데이터베이스에 저장
 const fetchAndStoreData = async () => {
     try {
         const response = await axios.get(
@@ -455,10 +330,8 @@ const fetchAndStoreData = async () => {
     }
 };
 
-// 서버 시작 시 데이터 가져오기
 fetchAndStoreData();
 
-// API 엔드포인트 확장
 app.get("/average-waste", async (req, res) => {
     const { city } = req.query;
     const tableName = city.replace(/광역시|특별시/g, "").toLowerCase();
@@ -486,7 +359,6 @@ app.get("/average-waste", async (req, res) => {
         res.status(500).send("Server error");
     }
 });
-// ----------------------------------------------------------------------------------------------------------여기까지 가계부
 
 app.listen(port, () => {
     console.log(`서버가 http://localhost:${port} 에서 실행 중입니다.`);
