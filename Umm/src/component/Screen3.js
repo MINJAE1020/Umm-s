@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import moment from "moment-timezone";
+import "moment/locale/ko"; // 한글 locale 추가
 
 const screen = {
     display: "flex",
@@ -8,7 +10,7 @@ const alarmContent = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    width: "450px",
+    width: "700px",
 };
 
 const selectBar = {
@@ -63,6 +65,15 @@ const removeButton = {
     fontWeight: "bold", // 글씨를 굵게 설정
 };
 
+const rightScreen = {
+    width: "400px", // 너비를 100%로 설정
+    fontWeight: "bold", // 글꼴을 굵게 설정
+    fontSize: "25px", // 글꼴 크기를 15px로 설정
+    display: "flex", // 플렉스 디스플레이를 사용하여 가운데 정렬을 위한 설정
+    justifyContent: "center", // 가로 정렬을 가운데로 설정
+    alignItems: "center", // 세로 정렬을 가운데로 설정
+};
+
 const daysOfWeek = [
     "일요일",
     "월요일",
@@ -80,6 +91,11 @@ const Screen3 = () => {
         hour: "",
         minute: "",
     });
+    const [currentTime, setCurrentTime] = useState(moment().tz("Asia/Seoul"));
+    const currentDateTime = currentTime.format("YYYY-MM-DD HH:mm:ss"); // 현재 시간을 가져옴
+    moment.locale("ko"); // 한글 locale 설정
+    const currentDayOfWeek = currentTime.format("dddd"); // 현재 요일을 가져옴
+    const dateTimeWithDayOfWeek = `${currentDateTime}, ${currentDayOfWeek}`; // 시간과 요일을 결합
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -102,6 +118,14 @@ const Screen3 = () => {
 
         return () => clearInterval(interval);
     }, [alarms]);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentTime(moment().tz("Asia/Seoul"));
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     const handleAddAlarm = () => {
         if (alarms.length >= 4) {
@@ -141,6 +165,12 @@ const Screen3 = () => {
 
     return (
         <div className="screen" style={screen}>
+            <div className="rightScreen" style={rightScreen}>
+                <div>
+                    현재 시간: <br />
+                    {dateTimeWithDayOfWeek}
+                </div>
+            </div>
             <div style={alarmContent}>
                 <div className="select" style={selectBar}>
                     <select

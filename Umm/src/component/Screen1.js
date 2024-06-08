@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import truck from "../img/truck.png";
+import phone from "../img/phone.png";
 
 // Sample data for regions, districts, and neighborhoods
 const data = {
@@ -855,11 +857,11 @@ function Screen1() {
                     )}
 
                     <div style={department}>
-                        <img style={imgIcon} src="" alt="icon" />
+                        <img style={imgIcon} src={truck} alt="icon" />
                         <p style={dpstyle}>
                             {result ? result.departmentName : "환경청소과"}
                         </p>
-                        <img style={imgIcon} src="" alt="icon" />
+                        <img style={imgIcon} src={phone} alt="icon" />
                         <p style={dpstyle}>
                             {result ? result.departmentPhone : "032-xx-xxx"}
                         </p>
