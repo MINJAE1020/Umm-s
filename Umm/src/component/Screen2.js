@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+// Screen2.js
+
+import React, { useState } from "react";
+import KakaoMap from "./KakaoMap.js";
 import imgTrash from "../img/trashbag.png";
 
 const styles = {
@@ -76,119 +78,6 @@ const styles = {
 
 function Screen2() {
     const [userLocation, setUserLocation] = useState("");
-    const [locations, setLocations] = useState([]);
-
-    useEffect(() => {
-        const email = "user@example.com"; // replace with the actual email
-
-        axios
-            .get(`http://localhost:3001/userlocation?email=${email}`)
-            .then((response) => {
-                console.log("사용자 위치 데이터:", response.data);
-                setUserLocation(response.data.location);
-            })
-            .catch((error) => {
-                console.error("사용자 위치를 가져오는 중 에러 발생:", error);
-            });
-
-        axios
-            .get("http://localhost:3001/locations")
-            .then((response) => {
-                console.log("장소 데이터:", response.data);
-                setLocations(response.data);
-            })
-            .catch((error) => {
-                console.error("장소 데이터를 가져오는 중 에러 발생:", error);
-            });
-    }, []);
-
-    useEffect(() => {
-        const script = document.createElement("script");
-        script.src =
-            "//dapi.kakao.com/v2/maps/sdk.js?appkey=8dc57e5937a2a6644c966d7cda41aebc&libraries=services";
-        script.async = true;
-        document.head.appendChild(script);
-
-        script.onload = () => {
-            if (window.kakao && window.kakao.maps) {
-                initializeMap();
-            } else {
-                console.error("카카오 지도 API를 로드할 수 없습니다.");
-            }
-        };
-
-        return () => {
-            document.head.removeChild(script);
-        };
-    }, [userLocation, locations]);
-
-    const initializeMap = () => {
-        const infowindow = new window.kakao.maps.InfoWindow({
-            zIndex: 1,
-        });
-
-        const mapContainer = document.getElementById("map");
-        const mapOption = {
-            center: new window.kakao.maps.LatLng(36.1460625, 128.3934375),
-            level: 3,
-        };
-
-        const map = new window.kakao.maps.Map(mapContainer, mapOption);
-
-        if (userLocation) {
-            const ps = new window.kakao.maps.services.Places();
-            ps.keywordSearch(userLocation, (data, status) => {
-                if (status === window.kakao.maps.services.Status.OK) {
-                    const bounds = new window.kakao.maps.LatLngBounds();
-                    data.forEach((place) => {
-                        displayMarker(map, infowindow, place);
-                        bounds.extend(
-                            new window.kakao.maps.LatLng(place.y, place.x)
-                        );
-                    });
-                    map.setBounds(bounds);
-                } else {
-                    console.error("사용자 위치 검색 실패:", status);
-                }
-            });
-        }
-
-        locations.forEach((location) => {
-            const marker = new window.kakao.maps.Marker({
-                map: map,
-                position: new window.kakao.maps.LatLng(
-                    location.latitude,
-                    location.longitude
-                ),
-                title: location.locationName,
-            });
-
-            window.kakao.maps.event.addListener(marker, "click", () => {
-                infowindow.setContent(
-                    '<div style="padding:5px;font-size:12px;">' +
-                        location.locationName +
-                        "</div>"
-                );
-                infowindow.open(map, marker);
-            });
-        });
-    };
-
-    const displayMarker = (map, infowindow, place) => {
-        const marker = new window.kakao.maps.Marker({
-            map: map,
-            position: new window.kakao.maps.LatLng(place.y, place.x),
-        });
-
-        window.kakao.maps.event.addListener(marker, "click", () => {
-            infowindow.setContent(
-                '<div style="padding:5px;font-size:12px;">' +
-                    place.place_name +
-                    "</div>"
-            );
-            infowindow.open(map, marker);
-        });
-    };
 
     return (
         <div className="screen" style={styles.screen}>
@@ -201,7 +90,7 @@ function Screen2() {
                         </div>
                     </label>
                 </div>
-                <div id="map" style={styles.mapContent}></div>
+                <KakaoMap userLocation={userLocation} />
             </div>
 
             <div className="data-container" style={styles.dataContainer}>

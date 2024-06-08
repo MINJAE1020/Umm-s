@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import moment from "moment-timezone";
 import "moment/locale/ko"; // 한글 locale 추가
 
@@ -66,7 +67,7 @@ const removeButton = {
 };
 
 const rightScreen = {
-    width: "400px", // 너비를 100%로 설정
+    width: "500px", // 너비를 100%로 설정
     fontWeight: "bold", // 글꼴을 굵게 설정
     fontSize: "25px", // 글꼴 크기를 15px로 설정
     display: "flex", // 플렉스 디스플레이를 사용하여 가운데 정렬을 위한 설정
@@ -106,20 +107,42 @@ const Screen3 = () => {
                 const [hour, minute] = time.split(":");
 
                 if (
-                    currentTime.getDay() === parseInt(day, 10) &&
-                    currentTime.getHours() === parseInt(hour, 10) &&
-                    currentTime.getMinutes() === parseInt(minute, 10)
+                    currentTime.getDay().toString() === day &&
+                    currentTime.getHours().toString() === hour &&
+                    currentTime.getMinutes().toString() === minute
                 ) {
-                    // 여기서 알림을 실행하거나 원하는 동작을 트리거합니다.
-                    console.log("Alarm triggered:", alarm.time);
+                    alert("배출 시간이 되었습니다!");
+                    clearInterval(interval); // 한 번 알림을 띄우면 interval 정지
                 }
             });
-        }, 1000); // 매 초마다 체크
+        }, 60000);
 
         return () => clearInterval(interval);
     }, [alarms]);
 
     useEffect(() => {
+        const fetchAlarms = async () => {
+            const userEmail = localStorage.getItem("userEmail");
+            if (!userEmail) {
+                alert("로그인이 필요합니다.");
+                return;
+            }
+
+            try {
+                const response = await axios.get(
+                    "http://localhost:3001/alarms",
+                    {
+                        params: { userEmail },
+                    }
+                );
+                setAlarms(response.data);
+            } catch (error) {
+                console.error("Error fetching alarms:", error);
+            }
+        };
+
+        fetchAlarms();
+
         const interval = setInterval(() => {
             setCurrentTime(moment().tz("Asia/Seoul"));
         }, 1000);
@@ -127,120 +150,135 @@ const Screen3 = () => {
         return () => clearInterval(interval);
     }, []);
 
-    const handleAddAlarm = () => {
-        if (alarms.length >= 4) {
-            alert("알람은 최대 4개만 등록 가능.");
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setAlarmTime((prevState) => ({
+            ...prevState,
+            [name]: value,
+        }));
+    };
+
+    const handleAddAlarm = async () => {
+        const userEmail = localStorage.getItem("userEmail"); // 저장된 이메일 가져오기
+        if (!userEmail) {
+            alert("로그인이 필요합니다.");
             return;
         }
 
-        const { day, hour, minute } = alarmTime;
-        if (day !== "" && hour !== "" && minute !== "") {
-            const formattedTime = `${day} ${hour}:${minute}`;
-            const newAlarm = {
-                id: Date.now(), // 타임스탬프를 ID로 사용
-                time: formattedTime,
-            };
-            setAlarms((prevAlarms) => [...prevAlarms, newAlarm]);
-            setAlarmTime({ day: "", hour: "", minute: "" });
-        } else {
-            alert("모든 필드를 채워 알람을 설정해주세요.");
+        try {
+            const response = await axios.post(
+                "http://localhost:3001/add-alarm",
+                {
+                    userEmail,
+                    day: alarmTime.day,
+                    hour: alarmTime.hour,
+                    minute: alarmTime.minute,
+                }
+            );
+
+            if (response.status === 200) {
+                setAlarms([
+                    ...alarms,
+                    {
+                        time: `${alarmTime.day} ${alarmTime.hour}:${alarmTime.minute}`,
+                    },
+                ]);
+            }
+        } catch (error) {
+            console.error("Error adding alarm:", error);
+            alert("알람 추가 중 오류가 발생했습니다.");
         }
     };
 
-    const handleRemoveAlarm = (id) => {
-        const updatedAlarms = alarms.filter((alarm) => alarm.id !== id);
-        setAlarms(updatedAlarms);
-    };
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setAlarmTime({ ...alarmTime, [name]: value });
-    };
-
-    const formatAlarmTime = (alarm) => {
+    const handleRemoveAlarm = async (index) => {
+        const userEmail = localStorage.getItem("userEmail");
+        const alarm = alarms[index];
         const [day, time] = alarm.time.split(" ");
         const [hour, minute] = time.split(":");
-        return `${daysOfWeek[parseInt(day, 10)]} ${hour}시 ${minute}분`;
+
+        try {
+            const response = await axios.post(
+                "http://localhost:3001/remove-alarm",
+                {
+                    userEmail,
+                    day,
+                    hour,
+                    minute,
+                }
+            );
+
+            if (response.status === 200) {
+                const updatedAlarms = alarms.filter((_, i) => i !== index);
+                setAlarms(updatedAlarms);
+            }
+        } catch (error) {
+            console.error("Error removing alarm:", error);
+            alert("알람 삭제 중 오류가 발생했습니다.");
+        }
     };
 
     return (
-        <div className="screen" style={screen}>
-            <div className="rightScreen" style={rightScreen}>
-                <div>
-                    현재 시간: <br />
-                    {dateTimeWithDayOfWeek}
-                </div>
-            </div>
+        <div style={screen}>
+            <div style={rightScreen}>{dateTimeWithDayOfWeek}</div>
             <div style={alarmContent}>
-                <div className="select" style={selectBar}>
+                <div style={selectBar}>
                     <select
-                        style={selectStyle}
                         name="day"
                         value={alarmTime.day}
-                        onChange={handleInputChange}
+                        onChange={handleChange}
+                        style={selectStyle}
                     >
                         <option value="">요일</option>
-                        {[...Array(7).keys()].map((d) => (
-                            <option key={d} value={d}>
-                                {daysOfWeek[d]}
+                        {Array.from({ length: 7 }, (_, i) => (
+                            <option key={i} value={i}>
+                                {daysOfWeek[i]}
                             </option>
                         ))}
                     </select>
                     <select
-                        style={selectStyle}
                         name="hour"
                         value={alarmTime.hour}
-                        onChange={handleInputChange}
+                        onChange={handleChange}
+                        style={selectStyle}
                     >
                         <option value="">시간</option>
-                        {[...Array(24).keys()].map((h) => (
-                            <option key={h} value={h}>
-                                {h.toString().padStart(2, "0")}
+                        {Array.from({ length: 24 }, (_, i) => (
+                            <option key={i} value={i}>
+                                {i.toString().padStart(2, "0")}
                             </option>
                         ))}
                     </select>
-                    :
                     <select
-                        style={selectStyle}
                         name="minute"
                         value={alarmTime.minute}
-                        onChange={handleInputChange}
+                        onChange={handleChange}
+                        style={selectStyle}
                     >
                         <option value="">분</option>
-                        {[...Array(60).keys()].map((m) => (
-                            <option key={m} value={m}>
-                                {m.toString().padStart(2, "0")}
+                        {Array.from({ length: 60 }, (_, i) => (
+                            <option key={i} value={i}>
+                                {i.toString().padStart(2, "0")}
                             </option>
                         ))}
                     </select>
                 </div>
                 <div style={addButtonContainer}>
-                    <button style={addButton} onClick={handleAddAlarm}>
-                        +
+                    <button onClick={handleAddAlarm} style={addButton}>
+                        알람 추가
                     </button>
-                    <p style={{ marginLeft: "10px" }}>
-                        <strong>알람 추가</strong>
-                    </p>
                 </div>
-                <div>
-                    {alarms.map((alarm) => (
-                        <div
-                            key={alarm.id}
-                            style={{
-                                ...alarmItem,
-                                justifyContent: "space-between",
-                            }}
+                {alarms.map((alarm, index) => (
+                    <div key={index} style={alarmItem}>
+                        {daysOfWeek[parseInt(alarm.time?.split(" ")[0], 10)]}{" "}
+                        {alarm.time?.split(" ")[1]}
+                        <button
+                            onClick={() => handleRemoveAlarm(index)}
+                            style={removeButton}
                         >
-                            <p>{formatAlarmTime(alarm)}</p>
-                            <button
-                                style={removeButton}
-                                onClick={() => handleRemoveAlarm(alarm.id)}
-                            >
-                                알람 삭제
-                            </button>
-                        </div>
-                    ))}
-                </div>
+                            알람 삭제
+                        </button>
+                    </div>
+                ))}
             </div>
         </div>
     );

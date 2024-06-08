@@ -37,7 +37,9 @@ app.post("/login", (req, res) => {
             return res.status(500).json({ message: "Error" });
         }
         if (data.length > 0) {
-            return res.status(200).json({ message: "로그인 성공" });
+            return res
+                .status(200)
+                .json({ message: "로그인 성공", email: email });
         } else {
             return res.status(401).json({ message: "로그인 실패" });
         }
@@ -151,6 +153,57 @@ app.post("/search", (req, res) => {
                 });
             }
         }
+    });
+});
+
+app.post("/add-alarm", (req, res) => {
+    const { userEmail, day, hour, minute } = req.body;
+
+    const sql =
+        "INSERT INTO alarm (userEmail, day, hour, minute) VALUES (?, ?, ?, ?)";
+    db.query(sql, [userEmail, day, hour, minute], (err) => {
+        if (err) {
+            console.error("Error adding alarm to database:", err);
+            return res
+                .status(500)
+                .json({ message: "Error adding alarm to database" });
+        }
+        return res.status(200).json({ message: "알람이 추가되었습니다." });
+    });
+});
+
+// 새로운 엔드포인트 추가: 특정 사용자의 알람을 가져옴
+app.get("/alarms", (req, res) => {
+    const { userEmail } = req.query;
+
+    const sql = "SELECT day, hour, minute FROM alarm WHERE userEmail = ?";
+    db.query(sql, [userEmail], (err, results) => {
+        if (err) {
+            console.error("Error fetching alarms from database:", err);
+            return res
+                .status(500)
+                .json({ message: "Error fetching alarms from database" });
+        }
+        console.log(results);
+
+        // 데이터베이스에서 가져온 결과를 그대로 클라이언트에 반환
+        return res.status(200).json(results);
+    });
+});
+
+app.post("/remove-alarm", (req, res) => {
+    const { userEmail, day, hour, minute } = req.body;
+
+    const sql =
+        "DELETE FROM alarm WHERE userEmail = ? AND day = ? AND hour = ? AND minute = ?";
+    db.query(sql, [userEmail, day, hour, minute], (err) => {
+        if (err) {
+            console.error("Error removing alarm from database:", err);
+            return res
+                .status(500)
+                .json({ message: "Error removing alarm from database" });
+        }
+        return res.status(200).json({ message: "알람이 삭제되었습니다." });
     });
 });
 

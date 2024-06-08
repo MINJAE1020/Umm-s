@@ -20,9 +20,9 @@ const LoginForm = () => {
             console.log(response.data);
             if (response.data.message === "로그인 성공") {
                 alert("로그인 성공");
+                localStorage.setItem("userEmail", email); // 이메일 저장
                 navigate("/home");
             } else {
-                // 로그인 실패 시의 처리
                 alert("로그인 실패: " + response.data.message);
             }
         } catch (error) {
