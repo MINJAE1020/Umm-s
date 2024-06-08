@@ -145,7 +145,7 @@ const Screen3 = () => {
                     clearInterval(interval); // 한 번 알림을 띄우면 interval 정지
                 }
             });
-        }, 1000); // 1분마다 확인
+        }, 1000);
 
         return () => clearInterval(interval);
     }, [alarms]);
