@@ -1,8 +1,33 @@
 // Screen2.js
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import KakaoMap from "./KakaoMap.js";
 import imgTrash from "../img/trashbag.png";
+import {
+    Container,
+    Select,
+    MenuItem,
+    Button,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    CircularProgress,
+} from "@mui/material";
+
+const regions = [
+    "서울특별시",
+    "부산광역시",
+    "대구광역시",
+    "울산광역시",
+    "광주광역시",
+    "대전광역시",
+];
+const categories = ["전용봉투", "전용용기"];
 
 const styles = {
     screen: {
@@ -19,7 +44,7 @@ const styles = {
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
-        margin: "2%",
+        // margin: "2%",
     },
     locateBar: {
         border: "1px solid black",
@@ -36,8 +61,9 @@ const styles = {
         borderRadius: "5px",
     },
     dataContainer: {
-        width: "45%",
+        width: "90%",
         border: "1px solid black",
+        marginRight: "50px",
     },
     barList: {
         listStyleType: "none",
@@ -78,6 +104,45 @@ const styles = {
 
 function Screen2() {
     const [userLocation, setUserLocation] = useState("");
+    const [selectedRegion, setSelectedRegion] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("");
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get("http://localhost:3001/data", {
+                params: {
+                    region: selectedRegion,
+                    category: selectedCategory,
+                },
+            });
+            setData(response.data);
+        } catch (error) {
+            console.error("There was an error fetching the data!", error);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        if (selectedRegion && selectedCategory) {
+            fetchData();
+        }
+    }, [selectedRegion, selectedCategory]);
+
+    const columns = [
+        "품목",
+        "유형",
+        "1L",
+        "2L",
+        "3L",
+        "5L",
+        "6L",
+        "10L",
+        "15L",
+        "20L",
+    ];
 
     return (
         <div className="screen" style={styles.screen}>
@@ -94,7 +159,7 @@ function Screen2() {
             </div>
 
             <div className="data-container" style={styles.dataContainer}>
-                <select style={styles.select}>
+                {/* <select style={styles.select}>
                     <option value="type1">수거 용기</option>
                     <option value="type2">전용 봉투</option>
                 </select>
@@ -110,7 +175,67 @@ function Screen2() {
                         <p style={styles.pStyle}>2L</p>
                         <p style={styles.pStyle}>400</p>
                     </li>
-                </ul>
+                </ul> */}
+                <Container>
+                    <div style={{ marginBottom: "20px" }}>
+                        <Select
+                            value={selectedRegion}
+                            onChange={(e) => setSelectedRegion(e.target.value)}
+                            displayEmpty
+                            style={{ marginRight: "10px" }}
+                        >
+                            <MenuItem value="">Select Region</MenuItem>
+                            {regions.map((region) => (
+                                <MenuItem key={region} value={region}>
+                                    {region}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                        <Select
+                            value={selectedCategory}
+                            onChange={(e) =>
+                                setSelectedCategory(e.target.value)
+                            }
+                            displayEmpty
+                            style={{ marginRight: "10px" }}
+                        >
+                            <MenuItem value="">Select Category</MenuItem>
+                            {categories.map((category) => (
+                                <MenuItem key={category} value={category}>
+                                    {category}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </div>
+                    {loading ? (
+                        <CircularProgress />
+                    ) : (
+                        <TableContainer component={Paper}>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        {columns.map((key) => (
+                                            <TableCell key={key}>
+                                                {key}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {data.map((row, index) => (
+                                        <TableRow key={index}>
+                                            {columns.map((col, i) => (
+                                                <TableCell key={i}>
+                                                    {row[col]}
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    )}
+                </Container>
             </div>
         </div>
     );
