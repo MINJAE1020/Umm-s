@@ -139,39 +139,74 @@ job.start();
 
 processDataOnce();
 
+// app.post("/search", async (req, res) => {
+//     console.log("Received request:", req.body);
+//     const { region, district, dong } = req.body;
+//     const query = `SELECT * FROM howtodispose WHERE region = ? AND district = ? AND dong = ?`;
+
+//     await db.query(query, [region, district, dong], (err, results) => {
+//         if (err) {
+//             console.error("Error fetching data from database:", err);
+//             res.status(500).send("Server Error");
+//         } else {
+//             if (results.length === 0) {
+//                 res.status(404).json({ error: "Data not found" });
+//             } else {
+//                 const {
+//                     disposalDay,
+//                     nonCollectionDay,
+//                     disposalLocation,
+//                     disposalMethod,
+//                     disposalTime,
+//                     departmentName,
+//                     departmentPhone,
+//                 } = results[0];
+//                 res.json({
+//                     disposalDay,
+//                     nonCollectionDay,
+//                     disposalLocation,
+//                     disposalMethod,
+//                     disposalTime,
+//                     departmentName,
+//                     departmentPhone,
+//                 });
+//             }
+//         }
+//     });
+// });
 app.post("/search", async (req, res) => {
     console.log("Received request:", req.body);
     const { region, district, dong } = req.body;
     const query = `SELECT * FROM howtodispose WHERE region = ? AND district = ? AND dong = ?`;
-    await db.query(query, [region, district, dong], (err, results) => {
-        if (err) {
-            console.error("Error fetching data from database:", err);
-            res.status(500).send("Server Error");
+
+    try {
+        const [rows] = await db.query(query, [region, district, dong]);
+        if (rows.length === 0) {
+            res.status(404).json({ error: "Data not found" });
         } else {
-            if (results.length === 0) {
-                res.status(404).json({ error: "Data not found" });
-            } else {
-                const {
-                    disposalDay,
-                    nonCollectionDay,
-                    disposalLocation,
-                    disposalMethod,
-                    disposalTime,
-                    departmentName,
-                    departmentPhone,
-                } = results[0];
-                res.json({
-                    disposalDay,
-                    nonCollectionDay,
-                    disposalLocation,
-                    disposalMethod,
-                    disposalTime,
-                    departmentName,
-                    departmentPhone,
-                });
-            }
+            const {
+                disposalDay,
+                nonCollectionDay,
+                disposalLocation,
+                disposalMethod,
+                disposalTime,
+                departmentName,
+                departmentPhone,
+            } = rows[0];
+            res.json({
+                disposalDay,
+                nonCollectionDay,
+                disposalLocation,
+                disposalMethod,
+                disposalTime,
+                departmentName,
+                departmentPhone,
+            });
         }
-    });
+    } catch (error) {
+        console.error("Error fetching data from database:", error);
+        res.status(500).send("Server Error");
+    }
 });
 
 app.post("/add-alarm", async (req, res) => {

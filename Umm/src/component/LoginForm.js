@@ -60,10 +60,17 @@ const LoginForm = () => {
                             value={PW}
                             onChange={(e) => setPW(e.target.value)}
                         />
-                        <button type="submit">sign_in</button>
+                        <button type="submit" style={{ color: "white" }}>
+                            sign_in
+                        </button>
                     </form>
                     <p className="message">
-                        <button onClick={handleRegister}>sign_up</button>
+                        <button
+                            onClick={handleRegister}
+                            style={{ color: "white" }}
+                        >
+                            sign_up
+                        </button>
                     </p>
                 </div>
             </div>
