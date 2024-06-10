@@ -117,10 +117,10 @@ function Screen2() {
             }
 
             try {
-                const response = await axios.get(
-                    "http://localhost:3001/user-location",
+                const response = await axios.post(
+                    "http://localhost:3001/search-location",
                     {
-                        params: { userEmail },
+                        email: userEmail,
                     }
                 );
                 const userData = response.data;
@@ -130,7 +130,6 @@ function Screen2() {
                 setMessage("사용자 정보를 가져오는 중 오류가 발생했습니다.");
             }
         };
-
         fetchUserLocation();
     }, []);
 
@@ -192,7 +191,7 @@ function Screen2() {
             <div className="map-container" style={styles.mapContainer}>
                 <div style={styles.locateContent}>
                     <TextField
-                        label="사용자 위치"
+                        label="사용자 주소"
                         variant="outlined"
                         margin="normal"
                         value={userLocation}

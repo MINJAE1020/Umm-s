@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { Map, Marker } from "react-kakao-maps";
 
 const KakaoMap = () => {
     useEffect(() => {
@@ -12,7 +11,7 @@ const KakaoMap = () => {
         const map = new window.kakao.maps.Map(mapContainer, mapOption);
         const ps = new window.kakao.maps.services.Places();
 
-        ps.keywordSearch("대구역 근처 마트", (data, status, pagination) => {
+        ps.keywordSearch("근처 마트", (data, status, pagination) => {
             if (status === window.kakao.maps.services.Status.OK) {
                 const bounds = new window.kakao.maps.LatLngBounds();
 
@@ -53,7 +52,7 @@ const KakaoMap = () => {
         });
     }, []);
 
-    return <div id="map" style={{ width: "100%", height: "350px" }} />;
+    return <div id="map" style={{ width: "100%", height: "100%" }} />;
 };
 
 export default KakaoMap;

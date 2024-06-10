@@ -332,28 +332,6 @@ const fetchAndStoreData = async () => {
 
 fetchAndStoreData();
 
-app.post("/save-location", async (req, res) => {
-    const { email, userLocation } = req.body;
-
-    try {
-        const [rows] = await db.query(
-            "UPDATE user SET userLocation = ? WHERE email = ?",
-            [userLocation, email]
-        );
-        if (rows.affectedRows > 0) {
-            res.status(200).json({ message: "사용자 위치가 저장되었습니다." });
-        } else {
-            res.status(404).json({ error: "사용자를 찾을 수 없습니다." });
-        }
-    } catch (error) {
-        console.error(
-            "데이터베이스에서 사용자 위치를 저장하는 중 오류 발생:",
-            error
-        );
-        res.status(500).json({ message: "서버 오류" });
-    }
-});
-
 app.post("/search-location", async (req, res) => {
     const { email } = req.body;
 
@@ -371,6 +349,30 @@ app.post("/search-location", async (req, res) => {
     } catch (error) {
         console.error(
             "데이터베이스에서 사용자 위치를 검색하는 중 오류 발생:",
+            error
+        );
+        res.status(500).json({ message: "서버 오류" });
+    }
+});
+
+app.post("/update-location", async (req, res) => {
+    const { email, userLocation } = req.body;
+
+    try {
+        const [rows] = await db.query(
+            "UPDATE user SET userLocation = ? WHERE email = ?",
+            [userLocation, email]
+        );
+        if (rows.affectedRows > 0) {
+            res.status(200).json({
+                message: "사용자 위치가 업데이트되었습니다.",
+            });
+        } else {
+            res.status(404).json({ error: "사용자를 찾을 수 없습니다." });
+        }
+    } catch (error) {
+        console.error(
+            "데이터베이스에서 사용자 위치를 업데이트하는 중 오류 발생:",
             error
         );
         res.status(500).json({ message: "서버 오류" });
