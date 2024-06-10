@@ -79,7 +79,7 @@ function Screen5() {
                     sx={{ width: 700 }}
                 />
                 <TextField
-                    label="사용자 위치"
+                    label="사용자 주소"
                     variant="outlined"
                     margin="normal"
                     value={userLocation}

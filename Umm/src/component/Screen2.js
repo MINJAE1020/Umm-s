@@ -15,7 +15,6 @@ import {
     Paper,
     CircularProgress,
 } from "@mui/material";
-import KakaoMap from "./KakaoMap";
 
 const regions = [
     "서울특별시",
@@ -108,29 +107,82 @@ function Screen2() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        const fetchUserLocation = async () => {
-            const userEmail = localStorage.getItem("userEmail");
-            if (!userEmail) {
-                alert("로그인이 필요합니다.");
-                return;
-            }
+    const fetchUserLocation = async () => {
+        const userEmail = localStorage.getItem("userEmail");
+        if (!userEmail) {
+            alert("로그인이 필요합니다.");
+            return;
+        }
 
-            try {
-                const response = await axios.post(
-                    "http://localhost:3001/search-location",
-                    {
-                        email: userEmail,
-                    }
-                );
-                const userData = response.data;
-                setEmail(userData.email);
-                setUserLocation(userData.userLocation);
-            } catch (error) {
-                setMessage("사용자 정보를 가져오는 중 오류가 발생했습니다.");
-            }
-        };
+        try {
+            const response = await axios.post(
+                "http://localhost:3001/search-location",
+                {
+                    email: userEmail,
+                }
+            );
+            const userData = response.data;
+            setUserLocation(userData.userLocation);
+        } catch (error) {
+            console.error(
+                "사용자 정보를 가져오는 중 오류가 발생했습니다.",
+                error
+            );
+        }
+    };
+
+    useEffect(() => {
         fetchUserLocation();
+        const mapContainer = document.getElementById("map");
+        const mapOption = {
+            center: new window.kakao.maps.LatLng(36.1460625, 128.3934375),
+            level: 3,
+        };
+
+        const map = new window.kakao.maps.Map(mapContainer, mapOption);
+        const ps = new window.kakao.maps.services.Places();
+
+        ps.keywordSearch(
+            userLocation + "근처 마트",
+            (data, status, pagination) => {
+                if (status === window.kakao.maps.services.Status.OK) {
+                    const bounds = new window.kakao.maps.LatLngBounds();
+
+                    for (let i = 0; i < data.length; i++) {
+                        const place = data[i];
+                        const marker = new window.kakao.maps.Marker({
+                            map: map,
+                            position: new window.kakao.maps.LatLng(
+                                place.y,
+                                place.x
+                            ),
+                        });
+
+                        bounds.extend(
+                            new window.kakao.maps.LatLng(place.y, place.x)
+                        );
+                        window.kakao.maps.event.addListener(
+                            marker,
+                            "click",
+                            function () {
+                                const infowindow =
+                                    new window.kakao.maps.InfoWindow({
+                                        zIndex: 1,
+                                    });
+                                infowindow.setContent(
+                                    '<div style="padding:5px;font-size:12px;">' +
+                                        place.place_name +
+                                        "</div>"
+                                );
+                                infowindow.open(map, marker);
+                            }
+                        );
+                    }
+
+                    map.setBounds(bounds);
+                }
+            }
+        );
     }, []);
 
     const locationUpdate = async () => {
@@ -144,10 +196,63 @@ function Screen2() {
                     userLocation,
                 }
             );
-            setMessage(response.data.message);
             alert("사용자 정보가 성공적으로 변경되었습니다.");
+            fetchUserLocation();
+            const mapContainer = document.getElementById("map");
+            const mapOption = {
+                center: new window.kakao.maps.LatLng(36.1460625, 128.3934375),
+                level: 3,
+            };
+
+            const map = new window.kakao.maps.Map(mapContainer, mapOption);
+            const ps = new window.kakao.maps.services.Places();
+
+            ps.keywordSearch(
+                userLocation + "근처 마트",
+                (data, status, pagination) => {
+                    if (status === window.kakao.maps.services.Status.OK) {
+                        const bounds = new window.kakao.maps.LatLngBounds();
+
+                        for (let i = 0; i < data.length; i++) {
+                            const place = data[i];
+                            const marker = new window.kakao.maps.Marker({
+                                map: map,
+                                position: new window.kakao.maps.LatLng(
+                                    place.y,
+                                    place.x
+                                ),
+                            });
+
+                            bounds.extend(
+                                new window.kakao.maps.LatLng(place.y, place.x)
+                            );
+                            window.kakao.maps.event.addListener(
+                                marker,
+                                "click",
+                                function () {
+                                    const infowindow =
+                                        new window.kakao.maps.InfoWindow({
+                                            zIndex: 1,
+                                        });
+                                    infowindow.setContent(
+                                        '<div style="padding:5px;font-size:12px;">' +
+                                            place.place_name +
+                                            "</div>"
+                                    );
+                                    infowindow.open(map, marker);
+                                }
+                            );
+                        }
+
+                        map.setBounds(bounds);
+                    }
+                }
+            );
         } catch (error) {
-            setMessage("사용자 정보를 업데이트하는 중 오류가 발생했습니다.");
+            console.error(
+                "사용자 정보를 업데이트하는 중 오류가 발생했습니다.",
+                error
+            );
         }
     };
 
@@ -162,7 +267,7 @@ function Screen2() {
             });
             setData(response.data);
         } catch (error) {
-            console.error("There was an error fetching the data!", error);
+            console.error("데이터를 가져오는 중 오류가 발생했습니다.", error);
         }
         setLoading(false);
     };
@@ -211,7 +316,7 @@ function Screen2() {
                         변경
                     </Button>
                 </div>
-                <KakaoMap />
+                <div id="map" style={{ width: "100%", height: "100%" }} />
             </div>
             <div className="data-container" style={styles.dataContainer}>
                 <Container>
