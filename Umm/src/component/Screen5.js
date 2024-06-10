@@ -76,6 +76,7 @@ function Screen5() {
                     value={PW}
                     onChange={(e) => setPW(e.target.value)}
                     fullWidth
+                    sx={{ width: 700 }}
                 />
                 <TextField
                     label="사용자 위치"
@@ -84,6 +85,7 @@ function Screen5() {
                     value={userLocation}
                     onChange={(e) => setUserLocation(e.target.value)}
                     fullWidth
+                    sx={{ width: 700 }}
                 />
                 <TextField
                     label="나의 도구"
@@ -92,12 +94,13 @@ function Screen5() {
                     value={myTool}
                     onChange={(e) => setMyTool(e.target.value)}
                     fullWidth
+                    sx={{ width: 700 }}
                 />
                 <Button
                     variant="contained"
                     color="primary"
                     onClick={handleUpdate}
-                    sx={{ mt: 2 }}
+                    sx={{ width: 400, mt: 4 }}
                 >
                     변경
                 </Button>
