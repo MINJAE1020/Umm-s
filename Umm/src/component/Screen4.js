@@ -130,6 +130,7 @@ const Screen4 = () => {
             <label style={textStyle}>
                 사용자가 거주하고 있는 도시를 선택하세요:
                 <select value={selectedCity} onChange={handleSelectChange}>
+                    <option value="선택">선택</option>
                     <option value="서울">서울</option>
                     <option value="부산">부산</option>
                     <option value="대구">대구</option>

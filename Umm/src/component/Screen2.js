@@ -1,11 +1,8 @@
-// Screen2.js
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import KakaoMap from "./KakaoMap.js";
-import imgTrash from "../img/trashbag.png";
 import {
     Container,
+    TextField,
     Select,
     MenuItem,
     Button,
@@ -18,6 +15,7 @@ import {
     Paper,
     CircularProgress,
 } from "@mui/material";
+import KakaoMap from "./KakaoMap";
 
 const regions = [
     "서울특별시",
@@ -44,7 +42,6 @@ const styles = {
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
-        // margin: "2%",
     },
     locateBar: {
         border: "1px solid black",
@@ -103,11 +100,57 @@ const styles = {
 };
 
 function Screen2() {
+    const [email, setEmail] = useState("");
     const [userLocation, setUserLocation] = useState("");
+    const [message, setMessage] = useState("");
     const [selectedRegion, setSelectedRegion] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchUserLocation = async () => {
+            const userEmail = localStorage.getItem("userEmail");
+            if (!userEmail) {
+                alert("로그인이 필요합니다.");
+                return;
+            }
+
+            try {
+                const response = await axios.get(
+                    "http://localhost:3001/user-location",
+                    {
+                        params: { userEmail },
+                    }
+                );
+                const userData = response.data;
+                setEmail(userData.email);
+                setUserLocation(userData.userLocation);
+            } catch (error) {
+                setMessage("사용자 정보를 가져오는 중 오류가 발생했습니다.");
+            }
+        };
+
+        fetchUserLocation();
+    }, []);
+
+    const locationUpdate = async () => {
+        const userEmail = localStorage.getItem("userEmail");
+
+        try {
+            const response = await axios.post(
+                "http://localhost:3001/update-location",
+                {
+                    email: userEmail,
+                    userLocation,
+                }
+            );
+            setMessage(response.data.message);
+            alert("사용자 정보가 성공적으로 변경되었습니다.");
+        } catch (error) {
+            setMessage("사용자 정보를 업데이트하는 중 오류가 발생했습니다.");
+        }
+    };
 
     const fetchData = async () => {
         setLoading(true);
@@ -147,35 +190,31 @@ function Screen2() {
     return (
         <div className="screen" style={styles.screen}>
             <div className="map-container" style={styles.mapContainer}>
-                <div>
-                    <label style={styles.locateContent}>
-                        내위치:
-                        <div style={styles.locateBar}>
-                            <p>{userLocation || "로딩 중..."}</p>
-                        </div>
-                    </label>
+                <div style={styles.locateContent}>
+                    <TextField
+                        label="사용자 위치"
+                        variant="outlined"
+                        margin="normal"
+                        value={userLocation}
+                        onChange={(e) => setUserLocation(e.target.value)}
+                        sx={{ width: 400, margin: "0 5px", height: 56 }}
+                    />
+                    <Button
+                        variant="contained"
+                        onClick={locationUpdate}
+                        sx={{
+                            width: 50,
+                            height: 56,
+                            margin: "0 5px",
+                            color: "white",
+                        }}
+                    >
+                        변경
+                    </Button>
                 </div>
-                <KakaoMap userLocation={userLocation} />
+                <KakaoMap />
             </div>
-
             <div className="data-container" style={styles.dataContainer}>
-                {/* <select style={styles.select}>
-                    <option value="type1">수거 용기</option>
-                    <option value="type2">전용 봉투</option>
-                </select>
-
-                <ul className="bar-list" style={styles.barList}>
-                    <li className="bar-item" style={styles.barItem}>
-                        <img
-                            style={styles.imgIcon}
-                            src={imgTrash}
-                            alt="trash icon"
-                        ></img>
-                        <p style={styles.pStyle}>전용봉투</p>
-                        <p style={styles.pStyle}>2L</p>
-                        <p style={styles.pStyle}>400</p>
-                    </li>
-                </ul> */}
                 <Container>
                     <div style={{ marginBottom: "20px" }}>
                         <Select
