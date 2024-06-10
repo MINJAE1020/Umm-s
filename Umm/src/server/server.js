@@ -360,6 +360,48 @@ app.get("/average-waste", async (req, res) => {
     }
 });
 
+app.get("/user-info", async (req, res) => {
+    const { userEmail } = req.query;
+
+    try {
+        const [rows] = await db.query(
+            "SELECT email, userLocation, myTool FROM user WHERE email = ?",
+            [userEmail]
+        );
+        if (rows.length === 0) {
+            res.status(404).json({ error: "User not found" });
+        } else {
+            const userData = rows[0];
+            res.json(userData);
+        }
+    } catch (error) {
+        console.error("Error fetching user info from database:", error);
+        res.status(500).json({ message: "Server Error" });
+    }
+});
+
+app.post("/update-user", async (req, res) => {
+    const { email, PW, userLocation, myTool } = req.body;
+
+    try {
+        const [rows] = await db.query("SELECT * FROM user WHERE email = ?", [
+            email,
+        ]);
+        if (rows.length === 0) {
+            res.status(404).json({ error: "User not found" });
+        } else {
+            await db.query(
+                "UPDATE user SET PW = ?, userLocation = ?, myTool = ? WHERE email = ?",
+                [PW, userLocation, myTool, email]
+            );
+            res.status(200).json({ message: "유저 정보 변경 성공!" });
+        }
+    } catch (error) {
+        console.error("Error updating user in database:", error);
+        res.status(500).json({ message: "Error updating user in database" });
+    }
+});
+
 app.listen(port, () => {
     console.log(`서버가 http://localhost:${port} 에서 실행 중입니다.`);
 });

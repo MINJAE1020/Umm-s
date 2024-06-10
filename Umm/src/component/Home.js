@@ -58,7 +58,7 @@ function Home() {
                     {activeScreen === "Screen2" && <Screen2 />}
                     {activeScreen === "Screen3" && <Screen3 />}
                     {activeScreen === "Screen4" && <Screen4 />}
-                    {/* {activeScreen === "Screen3" && <Screen5 />} */}
+                    {activeScreen === "Screen5" && <Screen5 />}
                 </div>
             </div>
         </div>
