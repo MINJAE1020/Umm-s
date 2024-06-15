@@ -5,7 +5,6 @@ import {
     TextField,
     Select,
     MenuItem,
-    Button,
     Table,
     TableBody,
     TableCell,
@@ -99,40 +98,36 @@ const styles = {
 };
 
 function Screen2() {
-    const [email, setEmail] = useState("");
     const [userLocation, setUserLocation] = useState("");
-    const [message, setMessage] = useState("");
     const [selectedRegion, setSelectedRegion] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const fetchUserLocation = async () => {
-        const userEmail = localStorage.getItem("userEmail");
-        if (!userEmail) {
-            alert("로그인이 필요합니다.");
-            return;
-        }
-
-        try {
-            const response = await axios.post(
-                "http://localhost:3001/search-location",
-                {
-                    email: userEmail,
-                }
-            );
-            const userData = response.data;
-            setUserLocation(userData.userLocation);
-        } catch (error) {
-            console.error(
-                "사용자 정보를 가져오는 중 오류가 발생했습니다.",
-                error
-            );
-        }
-    };
-
     useEffect(() => {
-        fetchUserLocation();
+        const fetchUserData = async () => {
+            const userEmail = localStorage.getItem("userEmail");
+            if (!userEmail) {
+                alert("로그인이 필요합니다.");
+                return;
+            }
+
+            try {
+                const response = await axios.post(
+                    "http://localhost:3001/search-location",
+                    { email: userEmail }
+                );
+                const userData = response.data;
+                setUserLocation(userData.userLocation);
+            } catch (error) {
+                console.error(
+                    "사용자 정보를 가져오는 중 오류가 발생했습니다.",
+                    error
+                );
+            }
+        };
+        fetchUserData(); // useEffect 내부에서 직접 호출
+
         const mapContainer = document.getElementById("map");
         const mapOption = {
             center: new window.kakao.maps.LatLng(36.1460625, 128.3934375),
@@ -183,78 +178,7 @@ function Screen2() {
                 }
             }
         );
-    }, []);
-
-    const locationUpdate = async () => {
-        const userEmail = localStorage.getItem("userEmail");
-
-        try {
-            const response = await axios.post(
-                "http://localhost:3001/update-location",
-                {
-                    email: userEmail,
-                    userLocation,
-                }
-            );
-            alert("사용자 정보가 성공적으로 변경되었습니다.");
-            fetchUserLocation();
-            const mapContainer = document.getElementById("map");
-            const mapOption = {
-                center: new window.kakao.maps.LatLng(36.1460625, 128.3934375),
-                level: 3,
-            };
-
-            const map = new window.kakao.maps.Map(mapContainer, mapOption);
-            const ps = new window.kakao.maps.services.Places();
-
-            ps.keywordSearch(
-                userLocation + "근처 마트",
-                (data, status, pagination) => {
-                    if (status === window.kakao.maps.services.Status.OK) {
-                        const bounds = new window.kakao.maps.LatLngBounds();
-
-                        for (let i = 0; i < data.length; i++) {
-                            const place = data[i];
-                            const marker = new window.kakao.maps.Marker({
-                                map: map,
-                                position: new window.kakao.maps.LatLng(
-                                    place.y,
-                                    place.x
-                                ),
-                            });
-
-                            bounds.extend(
-                                new window.kakao.maps.LatLng(place.y, place.x)
-                            );
-                            window.kakao.maps.event.addListener(
-                                marker,
-                                "click",
-                                function () {
-                                    const infowindow =
-                                        new window.kakao.maps.InfoWindow({
-                                            zIndex: 1,
-                                        });
-                                    infowindow.setContent(
-                                        '<div style="padding:5px;font-size:12px;">' +
-                                            place.place_name +
-                                            "</div>"
-                                    );
-                                    infowindow.open(map, marker);
-                                }
-                            );
-                        }
-
-                        map.setBounds(bounds);
-                    }
-                }
-            );
-        } catch (error) {
-            console.error(
-                "사용자 정보를 업데이트하는 중 오류가 발생했습니다.",
-                error
-            );
-        }
-    };
+    }, [userLocation]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -300,21 +224,9 @@ function Screen2() {
                         variant="outlined"
                         margin="normal"
                         value={userLocation}
-                        onChange={(e) => setUserLocation(e.target.value)}
-                        sx={{ width: 400, margin: "0 5px", height: 56 }}
+                        disabled
+                        sx={{ width: 450, margin: "0 5px", height: 56 }}
                     />
-                    <Button
-                        variant="contained"
-                        onClick={locationUpdate}
-                        sx={{
-                            width: 50,
-                            height: 56,
-                            margin: "0 5px",
-                            color: "white",
-                        }}
-                    >
-                        변경
-                    </Button>
                 </div>
                 <div id="map" style={{ width: "100%", height: "100%" }} />
             </div>
