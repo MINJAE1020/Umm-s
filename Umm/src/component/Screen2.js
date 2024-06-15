@@ -137,47 +137,45 @@ function Screen2() {
         const map = new window.kakao.maps.Map(mapContainer, mapOption);
         const ps = new window.kakao.maps.services.Places();
 
-        ps.keywordSearch(
-            userLocation + "근처 마트",
-            (data, status, pagination) => {
-                if (status === window.kakao.maps.services.Status.OK) {
-                    const bounds = new window.kakao.maps.LatLngBounds();
+        ps.keywordSearch(userLocation + "근처 마트", (data, status) => {
+            if (status === window.kakao.maps.services.Status.OK) {
+                const bounds = new window.kakao.maps.LatLngBounds();
 
-                    for (let i = 0; i < data.length; i++) {
-                        const place = data[i];
-                        const marker = new window.kakao.maps.Marker({
-                            map: map,
-                            position: new window.kakao.maps.LatLng(
-                                place.y,
-                                place.x
-                            ),
-                        });
+                for (let i = 0; i < data.length; i++) {
+                    const place = data[i];
+                    const marker = new window.kakao.maps.Marker({
+                        map: map,
+                        position: new window.kakao.maps.LatLng(
+                            place.y,
+                            place.x
+                        ),
+                    });
 
-                        bounds.extend(
-                            new window.kakao.maps.LatLng(place.y, place.x)
-                        );
-                        window.kakao.maps.event.addListener(
-                            marker,
-                            "click",
-                            function () {
-                                const infowindow =
-                                    new window.kakao.maps.InfoWindow({
-                                        zIndex: 1,
-                                    });
-                                infowindow.setContent(
-                                    '<div style="padding:5px;font-size:12px;">' +
-                                        place.place_name +
-                                        "</div>"
-                                );
-                                infowindow.open(map, marker);
-                            }
-                        );
-                    }
-
-                    map.setBounds(bounds);
+                    bounds.extend(
+                        new window.kakao.maps.LatLng(place.y, place.x)
+                    );
+                    window.kakao.maps.event.addListener(
+                        marker,
+                        "click",
+                        function () {
+                            const infowindow = new window.kakao.maps.InfoWindow(
+                                {
+                                    zIndex: 1,
+                                }
+                            );
+                            infowindow.setContent(
+                                '<div style="padding:5px;font-size:12px;">' +
+                                    place.place_name +
+                                    "</div>"
+                            );
+                            infowindow.open(map, marker);
+                        }
+                    );
                 }
+
+                map.setBounds(bounds);
             }
-        );
+        });
     }, [userLocation]);
 
     const fetchData = async () => {
